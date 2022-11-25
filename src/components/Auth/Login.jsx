@@ -31,7 +31,7 @@
 // }
 //   // const handleSubmit =(e) =>{
 //   //   e.preventDefault();
-//   //   console.log(email);
+//   //   console.log(username);
 //   // }
   
 //   return( 
@@ -52,116 +52,88 @@
 // } 
 
 
+
+
 import axios from "axios";
-import { useEffect, useState ,React} from "react";
-
-
+import { useState ,useEffect} from "react";
 
 export const Login = (props) =>
 {
+  const initialValues={username:"",password:""};
+  const [formValues,setFormValues] =useState(initialValues);
+  const [formErrors,setFormErrors] =useState({});
+  const [isSubmit,setIsSubmit]= useState(false);
 
-  const initialValues={username:"", password:""};
-  const[formValues,setFormValues]=useState(initialValues);
-  const [formErrors, setFormErrors] = useState({});
-  const [isSubmit, setIsSubmit] = useState(false);
-
-
-  const handleChange=(e) => {
-    
-    const{name,value} =e.target;
-    setFormValues({...formValues, [name]:value});
-    console.log(formValues);
+  const handleChange = (e) => {
+console.log(e.target);
+const {name,value} = e.target;
+setFormValues({...formValues, [name]:value});
+console.log(formValues);
   };
+
+   const handleSubmit = (e) => {
+ e.preventDefault();
+ setFormErrors(validate(formValues));
+ setIsSubmit(true);
+  };
+
+
+
+  useEffect( () => {
+    console.log(formErrors);
+    if(Object.keys(formErrors).length ===0 && isSubmit){
+      console.log(formValues); 
+
+    }
+
+  },[formErrors]);
   const validate = (values) => {
-    const errors = {};
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,3}$/i;
-    if (!values.EmailId) {
-      errors.EmailId = "Email is required!";
-    } else if (!regex.test(values.EmailId)) {
-      errors.EmailId = "This is not a valid email format!";
+    const errors={};
+    //const regex= /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    if (!values.username){
+      errors.username="username is required";
     }
-
-    if (!values.password) {
-      errors.password = "Password is required!";
+    if (!values.password){
+      errors.password="password is required";
+    }else if(values.password.length <4){
+      errors.password="password must be more than 4 charactes"
+    }else if(values.password.length >10){
+      errors.password="password must be more than 10 charactes"
     }
-
+    
     return errors;
-  }
-
-  // const handleApi=(e)=> {
-  //   e.preventDefault();
-  // };
-  const handleApi = () =>{
-    console.log({formValues});
-    setFormErrors(validate(formValues));
-    setIsSubmit(true);
-  }
-  useEffect{
-    ()=>{
-      if (Object.keys(formErrors).length === 0 && isSubmit) {
-        axios({
-          url: "",
-          method: "POST",
-          data: { EmailId: formValues.EmailId, password: formValues.password },
-        })
-        .then((result) => {
-          localStorage.setItem("token", result.data.token);
-          TokenCheck();
-          history.push("/Auth/Register");
-        })
-        .catch((error) => {
-          alert("Enter the valid Email or Password");
-          console.log(error);
-        });
-    }
-  },
-  [formErrors]
   };
-  // const[username, setUserName]= useState('')
-  // const[password,setPassword]=useState('')
 
-  // const handleUsername=(e) =>{
-  //   setUserName(e.target.value)
-  // }
+  const handleApi = () => {
+    console.log(formValues);
+    axios.post('https://localhost:7158/api/User/Login',formValues)
+    .then(result=> {
+      console.log(result)
+    })
+    .catch(error => {
+      console.log(error)
+    })
 
-  // const handlePassword=(e) => {
-  //   setPassword(e.target.value)
-  // }
 
-  // const handleApi=() => {
-  //   console.log({username,password})
-  //   axios.post('https://localhost:7158/api/User/Login',{
-  //     username:username,
-  //     password:password
-  //   })
-  //   .then(result => {
-  //     console.log(result.data)
-  //     alert('success')
-  //     localStorage.setItem('token',result.data.token)
-  //    // navigate('/register')
-
-  //   })
-  //   .catch(error => {
-  //     alert('service error')
-  //   })
-
-  // }
-
-return(
+  }
+  return(
     <div className="auth-form-container">
       <div className="heading"><label>Sign in</label></div>
-      {/* <pre>{JSON.stringify(formValues, undefined,2)} </pre> */}
-    <form className= "login-form"  onSubmit={handleApi}>
+
+      { Object.keys(formErrors).length ===0 && isSubmit ? (<div className="ui message succes"> signed in successfully</div>) :('')}
+    {/* <pre> {JSON.stringify(formValues,undefined,2)} </pre>  */}
+    <form className= "login-form"  onSubmit={handleSubmit}>
       <label htmlFor="username">User name </label>
-      <input onChange={handleChange} type="text" id="username" name="username"  value={ formValues.username}/>
+      <input  type="text" id="username" name="username"  value={formValues.username} onChange={handleChange} />
       <br />
+      <p> {formErrors.username}</p>
       <label htmlFor="password">Password</label>
-      <input  onChange={handleChange} type="text"  id="password" name="password" value={ formValues.password}/><br />
-      <div className="center"><button className ="login-btn" type="submit">Log In</button></div>
+      <input   type="text"  id="password" name="password" value={formValues.password}  onChange={handleChange}/><br />
+        <p> {formErrors.password}</p>
+      <div className="center"><button className ="login-btn" type="submit" onClick={handleApi}>Log In</button></div>
       <br/>
       <button className ="link-btn" onClick={() => props.onFormSwitch('register')}>Don't have an account? Register here</button>
     </form>
     </div>
     )
   }
-  
