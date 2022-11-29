@@ -56,6 +56,7 @@
 
 import axios from "axios";
 import { useState ,useEffect} from "react";
+import { login_url } from "../../Constants";
 
 export const Login = (props) =>
 {
@@ -106,12 +107,16 @@ console.log(formValues);
 
   const handleApi = () => {
     console.log(formValues);
-    axios.post('https://localhost:7158/api/User/Login',formValues)
+    axios.post(login_url,formValues)
     .then(result=> {
-      console.log(result)
+      console.log(result.data)
+      alert('success')
+      localStorage.setItem('token',result.data.token)
     })
     .catch(error => {
+      alert('error')
       console.log(error)
+      
     })
 
 
@@ -120,7 +125,8 @@ console.log(formValues);
     <div className="auth-form-container">
       <div className="heading"><label>Sign in</label></div>
 
-      { Object.keys(formErrors).length ===0 && isSubmit ? (<div className="ui message succes"> signed in successfully</div>) :('')}
+     {/* { Object.keys(formErrors).length === 0 && isSubmit ? (<div className="ui message succes"> signed in successfully</div>) :('')} */}
+      
     {/* <pre> {JSON.stringify(formValues,undefined,2)} </pre>  */}
     <form className= "login-form"  onSubmit={handleSubmit}>
       <label htmlFor="username">User name </label>
@@ -137,3 +143,4 @@ console.log(formValues);
     </div>
     )
   }
+  export default Login;

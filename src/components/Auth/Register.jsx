@@ -1,80 +1,120 @@
-import React, { useEffect, useState } from "react"
-import axios, { Axios } from "axios";
+import {useState,useEffect} from "react";
+import axios from "axios";
+export const Register = (props) =>
+{
+  const initialValues={Username:"",Email:"",PhoneNumber:"",Password:"",ConfirmPassword:""};
+  const [formValues,setFormValues] =useState(initialValues);
+  const [formErrors,setFormErrors] =useState({});
+  const [isSubmit,setIsSubmit]= useState(false);
 
-export const Register = (props) =>{
-  const[Username,setUsername] = useState('');
-  const[email,setEmail] = useState('');
-  const[phonenumber,setPhonenumber] = useState('');
-  const[password,setPassword] = useState('');
-  const[confirmpassword,setConfirmpassword] = useState('')
+  const handleChange = (e) => {
+    console.log(e.target);
+    const {name,value} = e.target;
+    setFormValues({...formValues, [name]:value});
+    console.log(formValues);
+      };
+    
+     const handleSubmit = (e) => {
+      e.preventDefault();
+      setFormErrors(validate(formValues));
+      setIsSubmit(true);
+     };
+   
+  useEffect( () => {
+    console.log(formErrors);
+    if(Object.keys(formErrors).length ===0 && isSubmit){
+      console.log(formValues); 
+    }
 
-  
+  },[formErrors]);
 
-  const handleEmailChange = (value) => {
-    setUsername(value);
+    const validate = (values) => {
+    const errors={};
+    //const regex= /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    if (!values.Username)
+    {
+      errors.Username="username is required";
+    }
+    if (!values.Email)
+    {
+      errors.Email="email is required";
+    }
+    if (!values.PhoneNumber)
+    {
+      errors.PhoneNumber="Phone number is required";
+    }
+    if (!values.Password)
+    {
+      errors.Password="password is required";
+    }else if(values.Password.length <4)
+    {
+      errors.password="password must be more than 4 charactes";
+    }else if(values.Password.length >10)
+    {
+      errors.Password="password must be more than 10 charactes";
+    }
+    if (!values.ConfirmPassword)
+    {
+      errors.ConfirmPassword="password is required";
+    }
+    
+    return errors;
+  };
+  const handleApi = () => {
+    console.log(formValues);
+    axios.post("https://localhost:7158/api/User/Register",formValues)
+    .then(result=> {
+      console.log(result)
+    })
+    .catch(error => {
+      console.log(error)
+    })
   }
-  const handlePhoneNumberChange = (value) => {
-    setPhonenumber(value);
-  }
-  const handlePasswordChange = (value) => {
-    setConfirmpassword(value);
-  }
-  const handleConfirmPasswordChange = (value) => {
-    setConfirmpassword(value);
-  }
-
-  // const handleApi = () => {
-  //   const data ={
-  //     Username :Username,
-  //     Email :email,
-  //     PhoneNumber :phonenumber,
-  //     Password :password,
-  //     ConfirmPassword :confirmpassword
-  //   };
-  
-
-  // const handleApi =() => {
-  //   console.log({formValues});
-  //   setFormErrors(validate(formValues));
-  //   setIsSubmit(true);
-  // }
-  // useEffect(
-  //   () => {
-  //     if(Object.keys(formErrors).length === 0 && isSubmit){
-  //       axios( {
-  //         url: "register_url",
-  //         method :"POST",
-  //         data:{Username : formValues.Username,Email :formValues.email,PhoneNumber :formValues.phonenumber,Password :formValues.password, ConfirmPassword : formValues.confirmpassword}
-  //       })
-  //       .then((result)=>{
-  //         history.pushState("/user/Login");
-  //       })
-  //     }
-  //   }
-  // )
-
   return( 
-   <form className="register-form" onSubmit={handlePasswordChange}>
-      <div className="heading"><label>Register</label></div>
-      <label htmlFor="Username">User name </label>
-      <input  type ="text" name="Username"  id="Username" />
+    <>
+     { Object.keys(formErrors).length ===0 && isSubmit ?(
+      <section>
+      <h1>You are now a new member</h1>
       <br/>
-      <label htmlFor="email">Email </label>
-      <input  onChange={(e) => handleEmailChange(e.target.value)} type="email"  id="email" name="email" />
-      <br />
-      <label htmlFor="phonenumber">Phone number </label>
-      <input  onChange={(e) => handlePhoneNumberChange(e.target.value)} type="text"  id="phonenumber" name="phonenumber" />
-      <br/>
-      <label htmlFor="password">Password </label>
-      <input  onChange={(e) => handlePasswordChange(e.target.value)} type="text"  id="password" name="password" />
-      <br/>
-      <label htmlFor="confirmpassword">Confirm Password </label>
-      <input  onChange={(e) => handleConfirmPasswordChange(e.target.value)} type="text"  id="confirmpassword" name="confirmpassword" /><br />
-      <br/>
-      <div className="center">
-      <button className ="login-btn" onClick={() => handleConfirmPasswordChange()} type="submit">Submit</button></div>
-      <br/>
-      <button className ="link-btn" onClick={() => props.onFormSwitch('login')}>Already have an account? Sign in </button>
-    </form>
-  )
+      <p>
+      <a href = "./src/components/Login">Sign in</a>
+      </p>
+      </section>
+    ):(
+        <div className="auth-form-container">
+        <div className="heading"><label>Register</label></div>
+        
+       
+       <form className="register-form" onSubmit={handleSubmit} >
+          
+          <label htmlFor="Username">User name </label>
+          <input  type ="text" name="Username"  id="Username" value={formValues.Username} onChange={handleChange} />
+          <br/>
+          <p> {formErrors.Username}</p>
+          <label htmlFor="Email">Email </label>
+          <input   type="text"  id="Email" name="Email" value={formValues.Email} onChange={handleChange} />
+          <br />
+          <p> {formErrors.Email}</p>
+          <label htmlFor="PhoneNumber">Phone number </label>
+          <input  type="text"  id="PhoneNumber" name="PhoneNumber" value={formValues.PhoneNumber} onChange={handleChange}/>
+          <br/>
+          <p> {formErrors.PhoneNumber}</p>
+          <label htmlFor="Password">Password </label>
+          <input type="text"  id="Password" name="Password" value={formValues.Password} onChange={handleChange} />
+          <br/>
+          <p> {formErrors.Password}</p>
+          <label htmlFor="ConfirmPassword">Confirm Password </label>
+          <input  type="text"  id="ConfirmPassword" name="ConfirmPassword" value={formValues.ConfirmPassword} onChange={handleChange} /><br />
+          <br/>
+          <p> {formErrors.ConfirmPassword}</p>
+          <div className="center">
+          <button className ="login-btn"  type="submit" onClick={handleApi} >Submit</button></div>
+          <br/>
+          <button className ="link-btn" onClick={() => props.onFormSwitch('login')}>Already have an account? Sign in </button>
+        </form>
+        </div>
+      )}
+      </>
+    )
 }
+export default Register;
